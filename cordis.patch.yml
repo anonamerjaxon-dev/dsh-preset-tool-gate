@@ -1,0 +1,52 @@
+# dsh-preset-tool-gate bundle patch.
+#
+# One host row, no tools of its own. It hides other plugins' tools from the
+# presets you do not list, which is the only way to have BOTH:
+#
+#   - a plugin's browser UI, because DSH composes client bundles from the host
+#     Loader's entries only (`dsh-client-modules` scans `ctx.loader.entries()`),
+#     so a plugin mounted inside a preset ships no UI at all; and
+#   - the token saving of not sending that plugin's tool schemas to sessions
+#     that never use them.
+#
+# One group per plugin: a flat `deny` + `allowPresets` can only serve one
+# plugin, because it would grant plugin A's tools wherever plugin B's are
+# allowed. Each group is evaluated on its own and the results are unioned.
+#
+# `inject` is read from the ENTRY ROW, not from the module exports, so both
+# services are declared here.
+- insert:
+    - id: preset-tool-gate
+      name: 'dsh-preset-tool-gate'
+      config:
+        groups:
+          # dsh-image-gen: six tools, ~6.6k tokens of schema. The gallery and
+          # canvas UI need the plugin at host level; the tools only make sense
+          # where images are the work.
+          - name: images
+            deny:
+              - generate_image
+              - generate_images
+              - edit_image
+              - canvas_state
+              - view_canvas
+              - find_inspiration
+            allowPresets:
+              - creative
+          # dsh-instance-manager: six tools for starting/stopping other DSH
+          # instances. Harness plumbing, so it stays with the harness-
+          # composition preset; every other preset drops from 38 to 32 tools.
+          # Its panel keeps working everywhere (see notes/CLIENT-UI.md).
+          - name: instances
+            deny:
+              - instance_list
+              - instance_logs
+              - instance_restart
+              - instance_sessions
+              - instance_start
+              - instance_stop
+            allowPresets:
+              - cordis
+      inject:
+        - tools
+        - agentPresets

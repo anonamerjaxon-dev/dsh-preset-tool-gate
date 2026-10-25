@@ -1,0 +1,19 @@
+{
+  "name": "dsh-preset-tool-gate",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hidden per-preset tool visibility: hide named tools from every preset except the ones you list, so a plugin can keep its browser UI (which is profile-wide) without paying its tool schemas in every session.",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "keywords": ["dsh", "dsh-plugin", "preset", "tools", "tokens"],
+  "engines": { "node": ">=22" },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "compatibility": { "dshReleases": { "0.2.1-rc.2": "compatible" }, "node": ">=22" }
+  },
+  "license": "MIT"
+}
